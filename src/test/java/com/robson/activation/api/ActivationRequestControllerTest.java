@@ -1,6 +1,6 @@
 package com.robson.activation.api;
 
-import com.robson.activation.application.ActivationRequestNotFoundException;
+import com.robson.activation.application.*;
 import com.robson.activation.application.ActivationRequestService;
 import com.robson.activation.domain.ActivationRequest;
 import org.junit.jupiter.api.Test;
@@ -37,10 +37,10 @@ class ActivationRequestControllerTest {
     @MockitoBean
     private ActivationRequestService service;
 
-    @Test
+        @Test
     void deveCriarSolicitacaoERetornar201ComLocation() throws Exception {
         var created = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
-        when(service.create("EXT-1", "CUST-1", "INTERNET-500")).thenReturn(created);
+        when(service.create("EXT-1", "CUST-1", "INTERNET-500")).thenReturn(new CreationResult(created, true));
 
         mockMvc.perform(post("/api/v1/requests")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -52,6 +52,35 @@ class ActivationRequestControllerTest {
                 .andExpect(jsonPath("$.id").value(created.getId().toString()))
                 .andExpect(jsonPath("$.status").value("PENDING"))
                 .andExpect(jsonPath("$.createdAt").value("2026-10-29T10:00:00Z"));
+    }
+
+    @Test
+    void deveRetornar200ComRegistroExistenteQuandoRetry() throws Exception {
+        var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
+        when(service.create("EXT-1", "CUST-1", "INTERNET-500")).thenReturn(new CreationResult(existing, false));
+
+        mockMvc.perform(post("/api/v1/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"externalId": "EXT-1", "customerId": "CUST-1", "productCode": "INTERNET-500"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(header().doesNotExist("Location"))
+                .andExpect(jsonPath("$.id").value(existing.getId().toString()));
+    }
+
+    @Test
+    void deveRetornar409QuandoMesmoExternalIdComConteudoDiferente() throws Exception {
+        when(service.create("EXT-1", "CUST-1", "TV-PREMIUM"))
+                .thenThrow(new DuplicateRequestConflictException("EXT-1"));
+
+        mockMvc.perform(post("/api/v1/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"externalId": "EXT-1", "customerId": "CUST-1", "productCode": "TV-PREMIUM"}
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.title").value("Solicitação duplicada"));
     }
 
     @Test
