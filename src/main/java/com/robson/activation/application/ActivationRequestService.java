@@ -1,7 +1,7 @@
 package com.robson.activation.application;
 
 import com.robson.activation.domain.ActivationRequest;
-import com.robson.activation.infrastructure.ActivationRequestRepository;
+import com.robson.activation.domain.ActivationRequestRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

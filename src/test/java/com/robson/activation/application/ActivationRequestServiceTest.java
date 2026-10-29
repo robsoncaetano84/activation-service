@@ -1,7 +1,7 @@
 package com.robson.activation.application;
 
 import com.robson.activation.domain.ActivationRequest;
-import com.robson.activation.infrastructure.ActivationRequestRepository;
+import com.robson.activation.domain.ActivationRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;

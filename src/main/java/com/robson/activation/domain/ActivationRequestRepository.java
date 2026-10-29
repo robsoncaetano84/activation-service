@@ -1,7 +1,5 @@
-package com.robson.activation.infrastructure;
+package com.robson.activation.domain;
 
-import com.robson.activation.domain.ActivationRequest;
-import com.robson.activation.domain.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
