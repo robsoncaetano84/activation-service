@@ -34,11 +34,11 @@ class ActivationRequestConcurrencyIT {
         try (var executor = Executors.newFixedThreadPool(THREADS)) {
             for (int i = 0; i < THREADS; i++) {
                 results.add(executor.submit(() -> {
-                    start.await(); 
+                    start.await();
                     return service.create("EXT-CONCORRENTE", "CUST-1", "INTERNET-500");
                 }));
             }
-            start.countDown(); 
+            start.countDown();
         }
 
         var created = 0;

@@ -2,9 +2,9 @@ package com.robson.activation.application;
 
 import com.robson.activation.domain.ActivationRequest;
 import com.robson.activation.infrastructure.ActivationRequestRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Clock;
 import java.util.UUID;

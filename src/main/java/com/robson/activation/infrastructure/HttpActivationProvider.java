@@ -75,7 +75,7 @@ public class HttpActivationProvider implements ActivationProvider {
         try {
             return Duration.ofSeconds(Long.parseLong(value.trim()));
         } catch (NumberFormatException ex) {
-            return null; 
+            return null;
         }
     }
 

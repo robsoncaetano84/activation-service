@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Import;
 @SpringBootTest(properties = "activation.worker.enabled=false")
 class ActivationServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

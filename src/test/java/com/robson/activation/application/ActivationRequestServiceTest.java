@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
 class ActivationRequestServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-10-29T10:00:00Z");
@@ -66,8 +65,8 @@ class ActivationRequestServiceTest {
     void deveTratarCorridaQuandoOutraRequisicaoGravaPrimeiro() {
         var winner = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
         when(repository.findByExternalId("EXT-1"))
-                .thenReturn(Optional.empty())       
-                .thenReturn(Optional.of(winner));   
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(winner));
         when(repository.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("uk_activation_request_external_id"));
 
         var result = service.create("EXT-1", "CUST-1", "INTERNET-500");

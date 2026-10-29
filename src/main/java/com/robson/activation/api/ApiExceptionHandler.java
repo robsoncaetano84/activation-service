@@ -1,6 +1,7 @@
 package com.robson.activation.api;
 
 import com.robson.activation.application.ActivationRequestNotFoundException;
+import com.robson.activation.application.DuplicateRequestConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import com.robson.activation.application.DuplicateRequestConflictException;
 
 import java.net.URI;
 
@@ -55,6 +55,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler(DuplicateRequestConflictException.class)
+    public ResponseEntity<Object> handleConflict(DuplicateRequestConflictException ex, WebRequest request) {
+        var problem = problem(HttpStatus.CONFLICT, "duplicate-request", "Solicitação duplicada", ex.getMessage());
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnexpected(Exception ex, WebRequest request) {
         log.error("Erro inesperado ao processar a requisição", ex);
@@ -77,11 +83,5 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         problem.setType(URI.create(PROBLEM_BASE_URI + type));
         problem.setTitle(title);
         return problem;
-    }
-	
-	@ExceptionHandler(DuplicateRequestConflictException.class)
-    public ResponseEntity<Object> handleConflict(DuplicateRequestConflictException ex, WebRequest request) {
-        var problem = problem(HttpStatus.CONFLICT, "duplicate-request", "Solicitação duplicada", ex.getMessage());
-        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 }

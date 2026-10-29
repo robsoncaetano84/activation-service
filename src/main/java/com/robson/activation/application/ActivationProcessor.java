@@ -79,7 +79,8 @@ public class ActivationProcessor {
     }
 
     private void applyResult(UUID id, ProviderResult result) {
-        var request = repository.findById(id).orElseThrow();
+        var request = repository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("Solicitação " + id + " sumiu antes de gravar o resultado"));
         var now = clock.instant();
         switch (result) {
             case Success success -> request.complete(now);
