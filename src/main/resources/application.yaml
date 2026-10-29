@@ -9,16 +9,17 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:9000}
 
 provider:
   base-url: ${PROVIDER_BASE_URL:http://localhost:8089}
   connect-timeout: ${PROVIDER_CONNECT_TIMEOUT:2s}
   read-timeout: ${PROVIDER_READ_TIMEOUT:5s}
 
-logging:
-  pattern:
-    level: "%5p [traceId=%X{traceId:-}]"
-    
 activation:
   worker:
     enabled: ${ACTIVATION_WORKER_ENABLED:true}
@@ -29,3 +30,7 @@ activation:
     base-delay: 5s
     max-delay: 5m
     stuck-after: 2m
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-}]"
