@@ -5,7 +5,6 @@ import com.robson.activation.application.ProviderResult.Success;
 import com.robson.activation.application.ProviderResult.TransientFailure;
 import com.robson.activation.domain.ActivationRequest;
 import com.robson.activation.domain.ActivationRequestRepository;
-import com.robson.activation.domain.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -49,7 +48,7 @@ public class ActivationProcessor {
     public int releaseStuck() {
         return transaction.execute(status -> {
             var now = clock.instant();
-            var stuck = repository.findByStatusAndUpdatedAtBefore(Status.PROCESSING, now.minus(properties.stuckAfter()));
+            var stuck = repository.findStuckInProcessing(now.minus(properties.stuckAfter()));
             stuck.forEach(request -> request.scheduleRetry("Processamento interrompido, reenviando", now, now));
             return stuck.size();
         });

@@ -22,5 +22,11 @@ public interface ActivationRequestRepository extends JpaRepository<ActivationReq
             """, nativeQuery = true)
     List<ActivationRequest> findReadyToProcess(@Param("now") Instant now, @Param("limit") int limit);
 
-    List<ActivationRequest> findByStatusAndUpdatedAtBefore(Status status, Instant cutoff);
+    // Mesmo SKIP LOCKED: duas instâncias reconciliando ao mesmo tempo não disputam as mesmas linhas
+    @Query(value = """
+            select * from activation_request
+             where status = 'PROCESSING' and updated_at < :cutoff
+             for update skip locked
+            """, nativeQuery = true)
+    List<ActivationRequest> findStuckInProcessing(@Param("cutoff") Instant cutoff);
 }
