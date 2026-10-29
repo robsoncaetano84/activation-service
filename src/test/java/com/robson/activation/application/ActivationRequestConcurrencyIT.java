@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties = "activation.worker.enabled=false")
 @Import(TestcontainersConfiguration.class)
 class ActivationRequestConcurrencyIT {
 
