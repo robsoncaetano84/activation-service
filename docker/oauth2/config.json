@@ -8,18 +8,19 @@
         {
           "requestParam": "scope",
           "match": "activation:read",
-          "claims": { "sub": "sistema-origem", "scope": "activation:read" }
+          "claims": { "sub": "sistema-origem", "aud": ["activation-service"], "scope": "activation:read" }
         },
         {
           "requestParam": "scope",
           "match": "activation:write",
-          "claims": { "sub": "sistema-origem", "scope": "activation:write" }
+          "claims": { "sub": "sistema-origem", "aud": ["activation-service"], "scope": "activation:write" }
         },
         {
           "requestParam": "scope",
           "match": "*",
           "claims": {
             "sub": "sistema-origem",
+            "aud": ["activation-service"],
             "scope": "activation:write activation:read"
           }
         }

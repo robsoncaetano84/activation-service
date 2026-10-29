@@ -14,6 +14,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:9000/default}
+          # token emitido para outra API do mesmo emissor é recusado
+          audiences: ${JWT_AUDIENCE:activation-service}
   task:
     scheduling:
       shutdown:
