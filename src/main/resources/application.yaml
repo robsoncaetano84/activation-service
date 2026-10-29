@@ -34,7 +34,8 @@ activation:
     max-attempts: 5
     base-delay: 5s
     max-delay: 5m
-    stuck-after: 2m
+    # precisa passar do pior caso de um lote: 20 x (2s de conexão + 5s de leitura) = 140s
+    stuck-after: 5m
 
 management:
   endpoints:
