@@ -29,10 +29,7 @@ public class ActivationRequestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ActivationRequestResponse> findById(@PathVariable UUID id) {
-        return service.findById(id)
-                .map(ActivationRequestResponse::from)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ActivationRequestResponse findById(@PathVariable UUID id) {
+        return ActivationRequestResponse.from(service.getById(id));
     }
 }

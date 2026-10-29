@@ -27,7 +27,8 @@ public class ActivationRequestService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ActivationRequest> findById(UUID id) {
-        return repository.findById(id);
+    public ActivationRequest getById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ActivationRequestNotFoundException(id));
     }
 }

@@ -1,5 +1,6 @@
 package com.robson.activation.api;
 
+import com.robson.activation.application.ActivationRequestNotFoundException;
 import com.robson.activation.application.ActivationRequestService;
 import com.robson.activation.domain.ActivationRequest;
 import org.junit.jupiter.api.Test;
@@ -10,10 +11,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -52,21 +55,36 @@ class ActivationRequestControllerTest {
     }
 
     @Test
-    void deveRetornar400QuandoCampoObrigatorioAusente() throws Exception {
+    void deveRetornar400ComOsCamposInvalidos() throws Exception {
         mockMvc.perform(post("/api/v1/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"externalId": "EXT-1", "productCode": "INTERNET-500"}
+                                {"externalId": "EXT 1", "productCode": "INTERNET-500"}
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Dados inválidos"))
+                .andExpect(jsonPath("$.errors.length()").value(2))
+                .andExpect(jsonPath("$.errors[?(@.field == 'customerId')].message").value("Informe o cliente"))
+                .andExpect(jsonPath("$.errors[?(@.field == 'externalId')].message").value("Use só letras, números, - ou _"))
+                .andExpect(jsonPath("$.traceId").value(not(emptyOrNullString())));
 
         verify(service, never()).create(anyString(), anyString(), anyString());
     }
 
     @Test
+    void deveRetornar400QuandoJsonMalformado() throws Exception {
+        mockMvc.perform(post("/api/v1/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ isso não é json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Requisição inválida"));
+    }
+
+    @Test
     void deveRetornarSolicitacaoExistente() throws Exception {
         var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
-        when(service.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(service.getById(existing.getId())).thenReturn(existing);
 
         mockMvc.perform(get("/api/v1/requests/{id}", existing.getId()))
                 .andExpect(status().isOk())
@@ -74,10 +92,33 @@ class ActivationRequestControllerTest {
     }
 
     @Test
-    void deveRetornar404QuandoSolicitacaoNaoExiste() throws Exception {
-        when(service.findById(any())).thenReturn(Optional.empty());
+    void deveRetornar404ComProblemDetailsQuandoSolicitacaoNaoExiste() throws Exception {
+        var id = UUID.randomUUID();
+        when(service.getById(id)).thenThrow(new ActivationRequestNotFoundException(id));
+
+        mockMvc.perform(get("/api/v1/requests/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Solicitação não encontrada"))
+                .andExpect(jsonPath("$.instance").value("/api/v1/requests/" + id));
+    }
+
+    @Test
+    void deveRetornar500SemExporDetalhesInternos() throws Exception {
+        when(service.getById(any())).thenThrow(new IllegalStateException("falha no pool de conexões"));
 
         mockMvc.perform(get("/api/v1/requests/{id}", UUID.randomUUID()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.title").value("Erro interno"))
+                .andExpect(jsonPath("$.detail").value(not(containsString("pool"))));
+    }
+
+    @Test
+    void deveReaproveitarOCorrelationIdRecebido() throws Exception {
+        var id = UUID.randomUUID();
+        when(service.getById(id)).thenThrow(new ActivationRequestNotFoundException(id));
+
+        mockMvc.perform(get("/api/v1/requests/{id}", id).header("X-Correlation-Id", "abc-123"))
+                .andExpect(header().string("X-Correlation-Id", "abc-123"))
+                .andExpect(jsonPath("$.traceId").value("abc-123"));
     }
 }
