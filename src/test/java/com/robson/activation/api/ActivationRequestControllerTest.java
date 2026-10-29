@@ -176,7 +176,11 @@ class ActivationRequestControllerTest {
         mockMvc.perform(post("/api/v1/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(BODY_VALIDO))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().exists("WWW-Authenticate"))
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Não autenticado"))
+                .andExpect(jsonPath("$.traceId").value(not(emptyOrNullString())));
 
         verify(service, never()).create(anyString(), anyString(), anyString());
     }
@@ -187,7 +191,10 @@ class ActivationRequestControllerTest {
                         .with(leitura())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(BODY_VALIDO))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Acesso negado"))
+                .andExpect(jsonPath("$.instance").value("/api/v1/requests"));
 
         verify(service, never()).create(anyString(), anyString(), anyString());
     }

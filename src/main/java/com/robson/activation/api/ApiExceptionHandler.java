@@ -17,20 +17,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.net.URI;
-
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
-    private static final String PROBLEM_BASE_URI = "https://api.exemplo.com/problems/";
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
-        var problem = problem(HttpStatus.BAD_REQUEST, "validation-error", "Dados inválidos",
+        var problem = ApiProblems.of(HttpStatus.BAD_REQUEST, "validation-error", "Dados inválidos",
                 "Um ou mais campos não passaram na validação.");
         var errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> new InvalidField(error.getField(), error.getDefaultMessage()))
@@ -44,27 +41,27 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
-        var problem = problem(HttpStatus.BAD_REQUEST, "malformed-request", "Requisição inválida",
+        var problem = ApiProblems.of(HttpStatus.BAD_REQUEST, "malformed-request", "Requisição inválida",
                 "O corpo da requisição não é um JSON válido.");
         return handleExceptionInternal(ex, problem, headers, status, request);
     }
 
     @ExceptionHandler(ActivationRequestNotFoundException.class)
     public ResponseEntity<Object> handleNotFound(ActivationRequestNotFoundException ex, WebRequest request) {
-        var problem = problem(HttpStatus.NOT_FOUND, "not-found", "Solicitação não encontrada", ex.getMessage());
+        var problem = ApiProblems.of(HttpStatus.NOT_FOUND, "not-found", "Solicitação não encontrada", ex.getMessage());
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(DuplicateRequestConflictException.class)
     public ResponseEntity<Object> handleConflict(DuplicateRequestConflictException ex, WebRequest request) {
-        var problem = problem(HttpStatus.CONFLICT, "duplicate-request", "Solicitação duplicada", ex.getMessage());
+        var problem = ApiProblems.of(HttpStatus.CONFLICT, "duplicate-request", "Solicitação duplicada", ex.getMessage());
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnexpected(Exception ex, WebRequest request) {
         log.error("Erro inesperado ao processar a requisição", ex);
-        var problem = problem(HttpStatus.INTERNAL_SERVER_ERROR, "internal-error", "Erro interno",
+        var problem = ApiProblems.of(HttpStatus.INTERNAL_SERVER_ERROR, "internal-error", "Erro interno",
                 "Não foi possível concluir a operação. Se o problema continuar, informe o traceId ao suporte.");
         return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
@@ -76,12 +73,5 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             problem.setProperty("traceId", CorrelationId.current());
         }
         return super.handleExceptionInternal(ex, body, headers, statusCode, request);
-    }
-
-    private ProblemDetail problem(HttpStatus status, String type, String title, String detail) {
-        var problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setType(URI.create(PROBLEM_BASE_URI + type));
-        problem.setTitle(title);
-        return problem;
     }
 }

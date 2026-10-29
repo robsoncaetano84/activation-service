@@ -1,5 +1,6 @@
 package com.robson.activation.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,7 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
+        var problems = new SecurityProblemHandler(objectMapper);
         http
                 // API sem sessão nem cookie: cada requisição traz o próprio token, então CSRF não se aplica
                 .csrf(AbstractHttpConfigurer::disable)
@@ -23,7 +25,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/requests").hasAuthority("SCOPE_activation:write")
                         .requestMatchers(HttpMethod.GET, "/api/v1/requests/**").hasAuthority("SCOPE_activation:read")
                         .anyRequest().denyAll())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(problems)
+                        .accessDeniedHandler(problems))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(problems)
+                        .accessDeniedHandler(problems));
         return http.build();
     }
 }
