@@ -18,3 +18,14 @@ provider:
 logging:
   pattern:
     level: "%5p [traceId=%X{traceId:-}]"
+    
+activation:
+  worker:
+    enabled: ${ACTIVATION_WORKER_ENABLED:true}
+    batch-size: 20
+    poll-interval: PT2S
+    reconcile-interval: PT1M
+    max-attempts: 5
+    base-delay: 5s
+    max-delay: 5m
+    stuck-after: 2m
