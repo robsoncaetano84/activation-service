@@ -1,0 +1,29 @@
+{
+  "interactiveLogin": false,
+  "tokenCallbacks": [
+    {
+      "issuerId": "default",
+      "tokenExpiry": 3600,
+      "requestMappings": [
+        {
+          "requestParam": "scope",
+          "match": "activation:read",
+          "claims": { "sub": "sistema-origem", "scope": "activation:read" }
+        },
+        {
+          "requestParam": "scope",
+          "match": "activation:write",
+          "claims": { "sub": "sistema-origem", "scope": "activation:write" }
+        },
+        {
+          "requestParam": "scope",
+          "match": "*",
+          "claims": {
+            "sub": "sistema-origem",
+            "scope": "activation:write activation:read"
+          }
+        }
+      ]
+    }
+  ]
+}
