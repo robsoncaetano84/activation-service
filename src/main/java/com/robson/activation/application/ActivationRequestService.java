@@ -4,9 +4,9 @@ import com.robson.activation.domain.ActivationRequest;
 import com.robson.activation.infrastructure.ActivationRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Clock;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,15 +20,32 @@ public class ActivationRequestService {
         this.clock = clock;
     }
 
-    @Transactional
-    public ActivationRequest create(String externalId, String customerId, String productCode) {
-        var request = ActivationRequest.create(externalId, customerId, productCode, clock.instant());
-        return repository.save(request);
+    public CreationResult create(String externalId, String customerId, String productCode) {
+        var existing = repository.findByExternalId(externalId);
+        if (existing.isPresent()) {
+            return resolveDuplicate(existing.get(), customerId, productCode);
+        }
+
+        try {
+            var request = ActivationRequest.create(externalId, customerId, productCode, clock.instant());
+            return CreationResult.created(repository.saveAndFlush(request));
+        } catch (DataIntegrityViolationException ex) {
+            // Outra requisição com o mesmo externalId foi gravada entre a busca e o INSERT
+            var winner = repository.findByExternalId(externalId).orElseThrow(() -> ex);
+            return resolveDuplicate(winner, customerId, productCode);
+        }
     }
 
     @Transactional(readOnly = true)
     public ActivationRequest getById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ActivationRequestNotFoundException(id));
+    }
+
+    private CreationResult resolveDuplicate(ActivationRequest existing, String customerId, String productCode) {
+        if (existing.hasSameContent(customerId, productCode)) {
+            return CreationResult.existing(existing);
+        }
+        throw new DuplicateRequestConflictException(existing.getExternalId());
     }
 }

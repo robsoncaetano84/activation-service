@@ -21,11 +21,16 @@ public class ActivationRequestController {
     @PostMapping
     public ResponseEntity<ActivationRequestResponse> create(@Valid @RequestBody NewActivationRequest body,
                                                             UriComponentsBuilder uriBuilder) {
-        var created = service.create(body.externalId(), body.customerId(), body.productCode());
+        var result = service.create(body.externalId(), body.customerId(), body.productCode());
+        var response = ActivationRequestResponse.from(result.request());
+
+        if (!result.created()) {
+            return ResponseEntity.ok(response);
+        }
         var location = uriBuilder.path("/api/v1/requests/{id}")
-                .buildAndExpand(created.getId())
+                .buildAndExpand(result.request().getId())
                 .toUri();
-        return ResponseEntity.created(location).body(ActivationRequestResponse.from(created));
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")
