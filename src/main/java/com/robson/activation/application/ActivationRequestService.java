@@ -27,7 +27,8 @@ public class ActivationRequestService {
         }
 
         try {
-            var request = ActivationRequest.create(externalId, customerId, productCode, clock.instant());
+            var request = ActivationRequest.create(externalId, customerId, productCode, CorrelationId.current(),
+                    clock.instant());
             return CreationResult.created(repository.saveAndFlush(request));
         } catch (DataIntegrityViolationException ex) {
             // Outra requisição com o mesmo externalId foi gravada entre a busca e o INSERT

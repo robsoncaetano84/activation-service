@@ -58,7 +58,7 @@ class ActivationRequestControllerTest {
 
     @Test
     void deveCriarSolicitacaoERetornar201ComLocation() throws Exception {
-        var created = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
+        var created = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", "trace-1", NOW);
         when(service.create("EXT-1", "CUST-1", "INTERNET-500")).thenReturn(new CreationResult(created, true));
 
         mockMvc.perform(post("/api/v1/requests")
@@ -74,7 +74,7 @@ class ActivationRequestControllerTest {
 
     @Test
     void deveRetornar200ComRegistroExistenteQuandoRetry() throws Exception {
-        var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
+        var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", "trace-1", NOW);
         when(service.create("EXT-1", "CUST-1", "INTERNET-500")).thenReturn(new CreationResult(existing, false));
 
         mockMvc.perform(post("/api/v1/requests")
@@ -132,7 +132,7 @@ class ActivationRequestControllerTest {
 
     @Test
     void deveRetornarSolicitacaoExistente() throws Exception {
-        var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
+        var existing = ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", "trace-1", NOW);
         when(service.getById(existing.getId())).thenReturn(existing);
 
         mockMvc.perform(get("/api/v1/requests/{id}", existing.getId()).with(leitura()))

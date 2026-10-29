@@ -1,10 +1,10 @@
 package com.robson.activation.api;
 
 import com.robson.activation.application.ActivationRequestNotFoundException;
+import com.robson.activation.application.CorrelationId;
 import com.robson.activation.application.DuplicateRequestConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -73,7 +73,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
                                                              HttpStatusCode statusCode, WebRequest request) {
         if (body instanceof ProblemDetail problem) {
-            problem.setProperty("traceId", MDC.get(CorrelationIdFilter.MDC_KEY));
+            problem.setProperty("traceId", CorrelationId.current());
         }
         return super.handleExceptionInternal(ex, body, headers, statusCode, request);
     }

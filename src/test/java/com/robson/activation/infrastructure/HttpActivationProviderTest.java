@@ -28,7 +28,7 @@ class HttpActivationProviderTest {
             .build();
 
     private final ActivationRequest request =
-            ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", Instant.parse("2026-10-29T10:00:00Z"));
+            ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", "trace-1", Instant.parse("2026-10-29T10:00:00Z"));
 
     private HttpActivationProvider client;
 
@@ -40,7 +40,7 @@ class HttpActivationProviderTest {
     }
 
     @Test
-    void deveRetornarSucessoEEnviarChaveDeIdempotencia() {
+    void deveRetornarSucessoEEnviarChaveDeIdempotenciaECorrelationId() {
         provider.stubFor(post(PATH).willReturn(ok()));
 
         var result = client.activate(request);
@@ -48,6 +48,7 @@ class HttpActivationProviderTest {
         assertThat(result).isInstanceOf(Success.class);
         provider.verify(postRequestedFor(urlEqualTo(PATH))
                 .withHeader("Idempotency-Key", equalTo(request.getId().toString()))
+                .withHeader("X-Correlation-Id", equalTo("trace-1"))
                 .withRequestBody(matchingJsonPath("$.customerId", equalTo("CUST-1")))
                 .withRequestBody(matchingJsonPath("$.productCode", equalTo("INTERNET-500"))));
     }

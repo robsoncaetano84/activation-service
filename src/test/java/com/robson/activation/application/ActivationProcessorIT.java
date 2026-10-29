@@ -8,6 +8,7 @@ import com.robson.activation.domain.ActivationRequestRepository;
 import com.robson.activation.domain.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -16,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,6 +96,23 @@ class ActivationProcessorIT {
         assertThat(request.getStatus()).isEqualTo(Status.FAILED);
         assertThat(request.getAttempts()).isEqualTo(5);
         assertThat(request.getLastError()).startsWith("Limite de tentativas atingido");
+    }
+
+    @Test
+    void deveChamarOProvedorComOTraceIdDaRequisicaoOriginal() {
+        MDC.put(CorrelationId.MDC_KEY, "trace-da-origem");
+        criarSolicitacao("EXT-RASTREIO");
+        MDC.clear();
+        var traceIdNaChamada = new AtomicReference<String>();
+        when(provider.activate(any())).thenAnswer(invocation -> {
+            traceIdNaChamada.set(MDC.get(CorrelationId.MDC_KEY));
+            return new Success();
+        });
+
+        processor.processPending();
+
+        assertThat(traceIdNaChamada.get()).isEqualTo("trace-da-origem");
+        assertThat(MDC.get(CorrelationId.MDC_KEY)).isNull();
     }
 
     private UUID criarSolicitacao(String externalId) {

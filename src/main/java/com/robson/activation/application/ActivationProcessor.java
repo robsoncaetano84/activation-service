@@ -8,6 +8,7 @@ import com.robson.activation.domain.ActivationRequestRepository;
 import com.robson.activation.domain.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -15,6 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -61,8 +63,10 @@ public class ActivationProcessor {
     }
 
     private void process(ActivationRequest request) {
-        var result = callProvider(request);
-        try {
+        // Solicitações antigas não têm traceId; o id delas serve para ligar os logs
+        var traceId = Objects.requireNonNullElse(request.getTraceId(), request.getId().toString());
+        try (var ignored = MDC.putCloseable(CorrelationId.MDC_KEY, traceId)) {
+            var result = callProvider(request);
             transaction.executeWithoutResult(status -> applyResult(request.getId(), result));
         } catch (ObjectOptimisticLockingFailureException ex) {
             log.warn("A solicitação {} foi alterada por outro processo; resultado descartado", request.getId());

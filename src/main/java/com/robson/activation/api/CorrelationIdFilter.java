@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.robson.activation.application.CorrelationId;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -19,7 +20,6 @@ import java.util.regex.Pattern;
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
     public static final String HEADER = "X-Correlation-Id";
-    public static final String MDC_KEY = "traceId";
 
     private static final Pattern VALID_ID = Pattern.compile("^[A-Za-z0-9-]{1,64}$");
 
@@ -27,12 +27,12 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
         var traceId = resolveTraceId(request.getHeader(HEADER));
-        MDC.put(MDC_KEY, traceId);
+        MDC.put(CorrelationId.MDC_KEY, traceId);
         response.setHeader(HEADER, traceId);
         try {
             chain.doFilter(request, response);
         } finally {
-            MDC.remove(MDC_KEY);
+            MDC.remove(CorrelationId.MDC_KEY);
         }
     }
 

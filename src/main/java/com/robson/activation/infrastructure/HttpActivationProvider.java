@@ -24,6 +24,7 @@ public class HttpActivationProvider implements ActivationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(HttpActivationProvider.class);
     private static final String ACTIVATE_PATH = "/provider/v1/activate";
+    private static final String CORRELATION_HEADER = "X-Correlation-Id";
 
     private final RestClient restClient;
 
@@ -44,6 +45,11 @@ public class HttpActivationProvider implements ActivationProvider {
             return restClient.post()
                     .uri(ACTIVATE_PATH)
                     .header("Idempotency-Key", request.getId().toString())
+                    .headers(headers -> {
+                        if (request.getTraceId() != null) {
+                            headers.set(CORRELATION_HEADER, request.getTraceId());
+                        }
+                    })
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(new ActivatePayload(request.getId(), request.getCustomerId(), request.getProductCode()))
                     .exchange((httpRequest, response) -> toResult(response.getStatusCode(), response.getHeaders()));

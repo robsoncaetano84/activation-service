@@ -42,6 +42,9 @@ public class ActivationRequest {
     @Column(name = "last_error", length = LAST_ERROR_MAX_LENGTH)
     private String lastError;
 
+    @Column(name = "trace_id", updatable = false, length = 64)
+    private String traceId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -54,13 +57,14 @@ public class ActivationRequest {
     protected ActivationRequest() {
     }
 
-    public static ActivationRequest create(String externalId, String customerId,
-                                           String productCode, Instant now) {
+    public static ActivationRequest create(String externalId, String customerId, String productCode,
+                                           String traceId, Instant now) {
         var request = new ActivationRequest();
         request.id = UUID.randomUUID();
         request.externalId = externalId;
         request.customerId = customerId;
         request.productCode = productCode;
+        request.traceId = traceId;
         request.status = Status.PENDING;
         request.attempts = 0;
         request.nextAttemptAt = now;
@@ -119,6 +123,7 @@ public class ActivationRequest {
     public int getAttempts() { return attempts; }
     public Instant getNextAttemptAt() { return nextAttemptAt; }
     public String getLastError() { return lastError; }
+    public String getTraceId() { return traceId; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

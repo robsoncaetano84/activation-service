@@ -11,7 +11,7 @@ class ActivationRequestTest {
     private static final Instant LATER = NOW.plusSeconds(60);
 
     private ActivationRequest newRequest() {
-        return ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", NOW);
+        return ActivationRequest.create("EXT-1", "CUST-1", "INTERNET-500", "trace-1", NOW);
     }
 
     @Test
