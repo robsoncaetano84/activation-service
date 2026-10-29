@@ -1,18 +1,21 @@
 package com.robson.activation.application;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Validated
 @ConfigurationProperties(prefix = "activation.worker")
 public record ActivationWorkerProperties(
-        boolean enabled,
-        int batchSize,
-        int maxAttempts,
-        Duration baseDelay,
-        Duration maxDelay,
-        Duration stuckAfter
+        @Positive int batchSize,
+        @Positive int maxAttempts,
+        @NotNull Duration baseDelay,
+        @NotNull Duration maxDelay,
+        @NotNull Duration stuckAfter
 ) {
 
     private static final double MAX_JITTER = 0.2;

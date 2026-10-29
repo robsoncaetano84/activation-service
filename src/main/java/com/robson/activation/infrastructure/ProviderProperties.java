@@ -1,10 +1,17 @@
 package com.robson.activation.infrastructure;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
 import java.time.Duration;
 
+@Validated
 @ConfigurationProperties(prefix = "provider")
-public record ProviderProperties(URI baseUrl, Duration connectTimeout, Duration readTimeout) {
+public record ProviderProperties(
+        @NotNull URI baseUrl,
+        @NotNull Duration connectTimeout,
+        @NotNull Duration readTimeout
+) {
 }

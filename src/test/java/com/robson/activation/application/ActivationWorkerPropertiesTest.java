@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ActivationWorkerPropertiesTest {
 
     private final ActivationWorkerProperties properties = new ActivationWorkerProperties(
-            true, 20, 5, Duration.ofSeconds(5), Duration.ofMinutes(5), Duration.ofMinutes(2));
+            20, 5, Duration.ofSeconds(5), Duration.ofMinutes(5), Duration.ofMinutes(2));
 
     @Test
     void deveDobrarAEsperaACadaTentativa() {
