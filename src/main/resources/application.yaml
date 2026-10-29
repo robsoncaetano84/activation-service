@@ -9,3 +9,12 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+
+provider:
+  base-url: ${PROVIDER_BASE_URL:http://localhost:8089}
+  connect-timeout: ${PROVIDER_CONNECT_TIMEOUT:2s}
+  read-timeout: ${PROVIDER_READ_TIMEOUT:5s}
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-}]"

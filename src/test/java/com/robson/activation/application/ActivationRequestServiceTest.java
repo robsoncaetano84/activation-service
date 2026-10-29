@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+
 class ActivationRequestServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-10-29T10:00:00Z");
