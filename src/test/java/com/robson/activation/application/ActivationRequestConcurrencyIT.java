@@ -2,6 +2,7 @@ package com.robson.activation.application;
 
 import com.robson.activation.TestcontainersConfiguration;
 import com.robson.activation.domain.ActivationRequestRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,12 @@ class ActivationRequestConcurrencyIT {
 
     @Autowired
     private ActivationRequestRepository repository;
+
+    // Outras classes de teste podem usar o mesmo banco
+    @BeforeEach
+    void limparBanco() {
+        repository.deleteAll();
+    }
 
     @Test
     void requisicoesSimultaneasComMesmoExternalIdGeramUmUnicoRegistro() throws Exception {
