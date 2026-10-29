@@ -14,6 +14,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:9000}
+  task:
+    scheduling:
+      shutdown:
+        await-termination: true
+        await-termination-period: 20s
 
 provider:
   base-url: ${PROVIDER_BASE_URL:http://localhost:8089}
@@ -30,6 +35,20 @@ activation:
     base-delay: 5s
     max-delay: 5m
     stuck-after: 2m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        readiness:
+          include: readinessState,db
 
 logging:
   pattern:
