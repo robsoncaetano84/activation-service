@@ -17,7 +17,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import java.io.IOException;
 import java.net.URI;
 
-// Responde 401 e 403 no mesmo formato dos outros erros da API, em vez de corpo vazio
 class SecurityProblemHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
 
     // Os handlers padrão do Spring continuam definindo o status e o cabeçalho WWW-Authenticate

@@ -11,7 +11,6 @@ import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.sli
 @AnalyzeClasses(packages = "com.robson.activation", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchitectureTest {
 
-    // api e infrastructure ficam nas pontas; application só conhece o domínio; o domínio não conhece ninguém
     @ArchTest
     static final ArchRule camadasSoDependemParaDentro = layeredArchitecture()
             .consideringOnlyDependenciesInLayers()

@@ -35,8 +35,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Valida tokens assinados de verdade, com as chaves publicadas num JWKS simulado,
-// para provar que assinatura, emissor, audiência e expiração são conferidos
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "activation.worker.enabled=false")
 @Import(TestcontainersConfiguration.class)

@@ -62,14 +62,16 @@ public class ActivationProcessor {
     }
 
     private void process(ActivationRequest request) {
-        // Solicitações antigas não têm traceId; o id delas serve para ligar os logs
-        var traceId = Objects.requireNonNullElse(request.getTraceId(), request.getId().toString());
-        try (var ignored = MDC.putCloseable(CorrelationId.MDC_KEY, traceId)) {
+        try (var ignored = MDC.putCloseable(CorrelationId.MDC_KEY, traceIdOrRequestId(request))) {
             var result = callProvider(request);
             transaction.executeWithoutResult(status -> applyResult(request.getId(), result));
         } catch (ObjectOptimisticLockingFailureException ex) {
             log.warn("A solicitação {} foi alterada por outro processo; resultado descartado", request.getId());
         }
+    }
+
+    private static String traceIdOrRequestId(ActivationRequest request) {
+        return Objects.requireNonNullElse(request.getTraceId(), request.getId().toString());
     }
 
     private ProviderResult callProvider(ActivationRequest request) {

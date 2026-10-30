@@ -5,7 +5,6 @@ import org.springframework.http.ProblemDetail;
 
 import java.net.URI;
 
-// Monta os erros da API sempre no mesmo formato (Problem Details, RFC 9457)
 final class ApiProblems {
 
     private static final String BASE_URI = "https://api.exemplo.com/problems/";
