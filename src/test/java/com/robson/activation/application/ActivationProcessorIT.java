@@ -16,7 +16,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -114,37 +113,6 @@ class ActivationProcessorIT {
 
         assertThat(traceIdNaChamada.get()).isEqualTo("trace-da-origem");
         assertThat(MDC.get(CorrelationId.MDC_KEY)).isNull();
-    }
-
-    @Test
-    void deveDevolverParaAFilaSolicitacaoPresaEmProcessamento() {
-        var id = criarSolicitacao("EXT-PRESA");
-        colocarEmProcessamentoDesde(id, Instant.now().minus(10, ChronoUnit.MINUTES));
-
-        var devolvidas = processor.releaseStuck();
-
-        var request = repository.findById(id).orElseThrow();
-        assertThat(devolvidas).isEqualTo(1);
-        assertThat(request.getStatus()).isEqualTo(Status.PENDING);
-        assertThat(request.getLastError()).startsWith("Processamento interrompido");
-    }
-
-    @Test
-    void naoDeveDevolverSolicitacaoQueAindaEstaNoPrazo() {
-        var id = criarSolicitacao("EXT-EM-ANDAMENTO");
-        colocarEmProcessamentoDesde(id, Instant.now());
-
-        var devolvidas = processor.releaseStuck();
-
-        assertThat(devolvidas).isZero();
-        assertThat(repository.findById(id).orElseThrow().getStatus()).isEqualTo(Status.PROCESSING);
-    }
-
-    // Deixa a solicitação em PROCESSING desde o instante informado, como se o worker tivesse caído no meio
-    private void colocarEmProcessamentoDesde(UUID id, Instant inicio) {
-        var request = repository.findById(id).orElseThrow();
-        request.startProcessing(inicio);
-        repository.save(request);
     }
 
     private UUID criarSolicitacao(String externalId) {

@@ -47,15 +47,6 @@ public class ActivationProcessor {
         return claimed.size();
     }
 
-    public int releaseStuck() {
-        return transaction.execute(status -> {
-            var now = clock.instant();
-            var stuck = repository.findStuckInProcessing(now.minus(properties.stuckAfter()));
-            stuck.forEach(request -> request.scheduleRetry("Processamento interrompido, reenviando", now, now));
-            return stuck.size();
-        });
-    }
-
     private List<ActivationRequest> claimBatch() {
         var now = clock.instant();
         var batch = repository.findReadyToProcess(now, properties.batchSize());
