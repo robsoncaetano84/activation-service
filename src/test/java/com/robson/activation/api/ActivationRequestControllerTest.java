@@ -52,7 +52,7 @@ class ActivationRequestControllerTest {
     @MockitoBean
     private ActivationRequestService service;
 
-    // Nos testes não existe emissor de token; o jwt() abaixo já entrega o usuário autenticado
+    // Não tem emissor de token no teste. O jwt() já entrega o usuário logado
     @MockitoBean
     private JwtDecoder jwtDecoder;
 

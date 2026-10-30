@@ -85,7 +85,7 @@ class ActivationProcessorIT {
     @Test
     void deveFalharAoAtingirOLimiteDeTentativas() {
         var id = criarSolicitacao("EXT-SEMPRE-FALHA");
-        // Retry-After zero: a solicitação volta para a fila na hora, sem esperar o backoff
+        // Retry-After zero para o teste não ficar esperando o backoff
         when(provider.activate(any())).thenReturn(new TransientFailure("Erro no provedor (HTTP 500)", Duration.ZERO));
 
         for (int tentativa = 1; tentativa <= 5; tentativa++) {

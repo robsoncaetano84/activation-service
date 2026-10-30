@@ -31,7 +31,7 @@ public class RetryPolicy {
         this.random = random;
     }
 
-    // Vazio quando as tentativas acabaram. Se o provedor mandou Retry-After, ele vale mais que o backoff
+    // Vazio quando acabaram as tentativas. Se o provedor mandou Retry-After, usa o tempo dele
     public Optional<Instant> nextAttempt(int attemptsSoFar, Duration retryAfter, Instant now) {
         if (attemptsSoFar >= maxAttempts) {
             return Optional.empty();
@@ -40,7 +40,7 @@ public class RetryPolicy {
         return Optional.of(now.plus(delay));
     }
 
-    // Exponencial (5s, 10s, 20s...) até o máximo, com até 20% a mais para espalhar as tentativas
+    // Dobra a espera a cada tentativa (5s, 10s, 20s...). O aleatório evita que todas tentem no mesmo segundo
     private Duration backoff(int attempt) {
         var exponential = baseDelay.toMillis() * (1L << Math.min(attempt - 1, 20));
         var capped = Math.min(exponential, maxDelay.toMillis());

@@ -57,7 +57,7 @@ class ActivationReconcilerIT {
         assertThat(repository.findById(id).orElseThrow().getStatus()).isEqualTo(Status.PROCESSING);
     }
 
-    // Deixa a solicitação em PROCESSING desde o instante informado, como se o worker tivesse caído no meio
+    // Simula o worker caindo no meio do processamento
     private void colocarEmProcessamentoDesde(UUID id, Instant inicio) {
         var request = repository.findById(id).orElseThrow();
         request.startProcessing(inicio);

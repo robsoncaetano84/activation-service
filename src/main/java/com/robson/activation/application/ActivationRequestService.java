@@ -31,7 +31,7 @@ public class ActivationRequestService {
                     clock.instant());
             return CreationResult.created(repository.saveAndFlush(request));
         } catch (DataIntegrityViolationException ex) {
-            // Outra requisição com o mesmo externalId foi gravada entre a busca e o INSERT
+            // Outra requisição gravou o mesmo externalId entre a busca e o insert
             var winner = repository.findByExternalId(externalId).orElseThrow(() -> ex);
             return resolveDuplicate(winner, customerId, productCode);
         }

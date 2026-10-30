@@ -19,7 +19,7 @@ import java.net.URI;
 
 class SecurityProblemHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
 
-    // Os handlers padrão do Spring continuam definindo o status e o cabeçalho WWW-Authenticate
+    // O Spring continua cuidando do status e do WWW-Authenticate. Aqui só entra o corpo do erro
     private final AuthenticationEntryPoint bearerEntryPoint = new BearerTokenAuthenticationEntryPoint();
     private final AccessDeniedHandler bearerAccessDeniedHandler = new BearerTokenAccessDeniedHandler();
     private final ObjectMapper objectMapper;

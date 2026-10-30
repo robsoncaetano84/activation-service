@@ -67,7 +67,7 @@ class JwtValidationIT {
     void deveAceitarTokenValido() throws JOSEException {
         var token = assinar(CHAVE, claims().build());
 
-        // passou pela segurança e chegou ao controller: o id não existe
+        // 404 aqui é bom sinal: passou pela segurança e chegou no controller
         assertThat(consultar(token)).isEqualTo(HttpStatus.NOT_FOUND);
     }
 

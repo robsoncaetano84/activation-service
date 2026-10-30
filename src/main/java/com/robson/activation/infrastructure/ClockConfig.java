@@ -10,8 +10,7 @@ import java.time.temporal.ChronoUnit;
 @Configuration
 public class ClockConfig {
 
-    // O PostgreSQL guarda até microssegundos; sem cortar aqui, o POST devolveria uma data
-    // com nanossegundos diferente da que o GET lê do banco
+    // O Postgres só guarda até microssegundos. Sem cortar aqui, o POST e o GET mostram datas diferentes
     @Bean
     public Clock clock() {
         return Clock.tick(Clock.systemUTC(), Duration.of(1, ChronoUnit.MICROS));

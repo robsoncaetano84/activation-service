@@ -20,7 +20,7 @@ public class ActivationReconciler {
         this.clock = clock;
     }
 
-    // Reenviar é seguro: a chamada ao provedor leva a chave de idempotência
+    // Pode reenviar: com a chave de idempotência o provedor não ativa duas vezes
     @Transactional
     public int releaseStuck() {
         var now = clock.instant();

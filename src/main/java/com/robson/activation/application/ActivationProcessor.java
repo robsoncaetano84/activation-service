@@ -51,7 +51,7 @@ public class ActivationProcessor {
         var now = clock.instant();
         var batch = repository.findReadyToProcess(now, properties.batchSize());
         batch.forEach(request -> request.startProcessing(now));
-        return batch; // o Hibernate grava o PROCESSING no commit desta transação
+        return batch; // o PROCESSING é salvo no commit desta transação
     }
 
     private void process(ActivationRequest request) {

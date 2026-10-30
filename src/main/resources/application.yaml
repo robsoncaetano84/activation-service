@@ -14,7 +14,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:9000/default}
-          # token emitido para outra API do mesmo emissor é recusado
+          # recusa token que foi feito para outra API
           audiences: ${JWT_AUDIENCE:activation-service}
   task:
     scheduling:
@@ -36,7 +36,7 @@ activation:
     max-attempts: 5
     base-delay: 5s
     max-delay: 5m
-    # precisa passar do pior caso de um lote: 20 x (2s de conexão + 5s de leitura) = 140s
+    # tem que ser maior que o pior caso de um lote: 20 x (2s + 5s) = 140s
     stuck-after: 5m
 
 management:

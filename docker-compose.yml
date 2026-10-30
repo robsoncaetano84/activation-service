@@ -37,8 +37,8 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/activation
       PROVIDER_BASE_URL: http://provider-mock:8080
-      # O token é pedido de fora (localhost:9000), então é esse o emissor gravado nele.
-      # As chaves a aplicação busca por dentro da rede do Compose.
+      # O token é pedido de fora, por localhost:9000, e é esse endereço que vai gravado nele.
+      # Já as chaves a aplicação busca por dentro da rede do Compose.
       JWT_ISSUER_URI: http://localhost:9000/default
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://oauth2:8080/default/jwks
     ports:

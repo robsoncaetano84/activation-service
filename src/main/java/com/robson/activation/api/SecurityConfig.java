@@ -17,7 +17,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
         var problems = new SecurityProblemHandler(objectMapper);
         http
-                // API sem sessão nem cookie: cada requisição traz o próprio token, então CSRF não se aplica
+                // Sem cookie não tem CSRF: o token vem em cada requisição
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
