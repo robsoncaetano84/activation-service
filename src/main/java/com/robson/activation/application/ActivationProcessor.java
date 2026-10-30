@@ -27,15 +27,17 @@ public class ActivationProcessor {
     private final ActivationProvider provider;
     private final TransactionTemplate transaction;
     private final ActivationWorkerProperties properties;
+    private final RetryPolicy retryPolicy;
     private final Clock clock;
 
     public ActivationProcessor(ActivationRequestRepository repository, ActivationProvider provider,
                                TransactionTemplate transaction, ActivationWorkerProperties properties,
-                               Clock clock) {
+                               RetryPolicy retryPolicy, Clock clock) {
         this.repository = repository;
         this.provider = provider;
         this.transaction = transaction;
         this.properties = properties;
+        this.retryPolicy = retryPolicy;
         this.clock = clock;
     }
 
@@ -95,13 +97,8 @@ public class ActivationProcessor {
     }
 
     private void retryOrFail(ActivationRequest request, TransientFailure failure, Instant now) {
-        if (request.getAttempts() >= properties.maxAttempts()) {
-            request.fail("Limite de tentativas atingido. Último erro: " + failure.reason(), now);
-            return;
-        }
-        var delay = failure.retryAfter() != null
-                ? failure.retryAfter()
-                : properties.retryDelay(request.getAttempts());
-        request.scheduleRetry(failure.reason(), now.plus(delay), now);
+        retryPolicy.nextAttempt(request.getAttempts(), failure.retryAfter(), now).ifPresentOrElse(
+                nextAttempt -> request.scheduleRetry(failure.reason(), nextAttempt, now),
+                () -> request.fail("Limite de tentativas atingido. Último erro: " + failure.reason(), now));
     }
 }
